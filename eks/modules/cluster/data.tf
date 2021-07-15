@@ -27,5 +27,7 @@ data "aws_ami" "eks-worker" {
   }
 
   most_recent = true
-  owners      = ["602401143452"] # Amazon EKS AMI Account ID
+  # us-east-1 x86 optimized-ami/1.20/amazon-linux-2
+  owners      = ["0260be01d66417f7f"]
+  # owners      = ["602401143452"] # Amazon EKS AMI Account ID
 }

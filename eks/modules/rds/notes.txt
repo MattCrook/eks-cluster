@@ -1,0 +1,14 @@
+Variables without defualt values
+
+variable "name"
+variable "zones"
+variable "db_name"
+variable "password"
+variable "tags"
+variable "rds_cluster_tags"
+variable "cluster_parameters"
+variable "db_parameters"
+variable "engine_version"
+variable "subnet_group"
+variable "security_groups"
+variable "create_from_snapshot"
