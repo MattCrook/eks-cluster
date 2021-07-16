@@ -10,19 +10,15 @@ resource "aws_vpc" "default" {
 }
 
 resource "aws_internet_gateway" "default" {
-  count = "${var.create_vpc && length(var.public_subnets) > 0 ? 1 : 0}"
-
+  count   = "${var.create_vpc && length(var.public_subnets) > 0 ? 1 : 0}"
   vpc_id = "${aws_vpc.default.id}"
-
-  tags = "${merge(var.tags, map("Name", format("%s", var.name)))}"
+  tags   = "${merge(var.tags, map("Name", format("%s", var.name)))}"
 }
 
 resource "aws_route_table" "public" {
-  count = "${var.create_vpc && length(var.public_subnets) > 0 ? 1 : 0}"
-
+  count  = "${var.create_vpc && length(var.public_subnets) > 0 ? 1 : 0}"
   vpc_id = "${aws_vpc.default.id}"
-
-  tags = "${merge(var.tags, var.public_route_table_tags, map("Name", format("%s-public", var.name)))}"
+  tags   = "${merge(var.tags, var.public_route_table_tags, map("Name", format("%s-public", var.name)))}"
 }
 
 resource "aws_route" "public_internet_gateway" {
@@ -38,11 +34,9 @@ resource "aws_route" "public_internet_gateway" {
 }
 
 resource "aws_route_table" "private" {
-  count = "${var.create_vpc && local.max_subnet_length > 0 ? local.nat_gateway_count : 0}"
-
+  count  = "${var.create_vpc && local.max_subnet_length > 0 ? local.nat_gateway_count : 0}"
   vpc_id = "${aws_vpc.default.id}"
-
-  tags = "${merge(var.tags, var.private_route_table_tags, map("Name", (var.single_nat_gateway ? "${var.name}-private" : format("%s-private-%s", var.name, element(var.zones, count.index)))))}"
+  tags   = "${merge(var.tags, var.private_route_table_tags, map("Name", (var.single_nat_gateway ? "${var.name}-private" : format("%s-private-%s", var.name, element(var.zones, count.index)))))}"
 
   lifecycle {
     # When attaching VPN gateways it is common to define aws_vpn_gateway_route_propagation

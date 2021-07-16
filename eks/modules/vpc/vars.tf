@@ -86,10 +86,10 @@ variable "enable_vpn_gateway" {
   default     = true
 }
 
-variable "vpn_gateway_id" {
-  description = "ID of VPN Gateway to attach to the VPC"
-  default     = ""
-}
+// variable "vpn_gateway_id" {
+//   description = "ID of VPN Gateway to attach to the VPC"
+//   default     = ""
+// }
 
 variable "propagate_private_route_tables_vgw" {
   description = "Should be true if you want route table propagation"
