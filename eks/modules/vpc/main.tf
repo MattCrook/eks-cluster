@@ -1,7 +1,7 @@
 resource "aws_vpc" "default" {
   count = "${var.create_vpc ? 1 : 0}"
 
-  # cidr_block           = "${var.range}"
+  cidr_block           = "${var.range}"
   instance_tenancy     = "${var.instance_tenancy}"
   enable_dns_hostnames = "${var.enable_dns_hostnames}"
   enable_dns_support   = "${var.enable_dns_support}"

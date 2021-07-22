@@ -9,10 +9,11 @@ variable "name" {
   default     = ""
 }
 
-// variable "range" {
-//   description = "The CIDR block for the VPC. Default value is a valid CIDR, but not acceptable by AWS and should be overriden"
-//   default     = "0.0.0.0/0"
-// }
+variable "range" {
+  description = "The CIDR block for the VPC. Default value is a valid CIDR, but not acceptable by AWS and should be overriden"
+  default     = "0.0.0.0/0"
+  # "10.21.190.0/23"
+}
 
 variable "instance_tenancy" {
   description = "A tenancy option for instances launched into the VPC"

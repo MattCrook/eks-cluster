@@ -1,92 +1,57 @@
 provider "aws" {
-  region = "us-east-1"
-}
-
-module "vpc" {
-  create_vpc = true
-  enable_nat_gateway = true
-  single_nat_gateway = true
-  one_nat_gateway_per_az = true
-  enable_vpn_gateway = true
-  name = ""
-  zones = []
-  public_subnets = []
-  private_subnets = []
-  enable_dns_hostnames = true
-  enable_dns_support = true
-  external_nat_ip_ids = []
-  map_public_ip_on_launch = true
-  reuse_nat_ips = false
-  propagate_public_route_tables_vgw = false
-  propagate_private_route_tables_vgw = false
-
-  public_subnet_tags = {}
-  private_subnet_tags = {}
-  public_route_table_tags = {}
-  private_route_table_tags = {}
-  vpc_tags = {}
-  default_route_table_tags = {}
-  tags = {}
+  region  = "${var.region}"
 }
 
 module "cluster" {
-  cluster_name = "EKSCluster"
-  vpc_id = "${module.vpc.vpc_id}"
-  private_subnets = "${module.vpc.private_subnets}"
-  instance_type = "t2.meduim"
-  log_retention_days = 5
-  instance_count = 2
-  worker_security_groups = [aws_security_group.allow_all_inbound.id, aws_security_group.allow_all_outbound.id, aws_security_group.allow_ssh.id]
-  master_security_groups = [aws_security_group.allow_all_inbound.id, aws_security_group.allow_all_outbound.id, aws_security_group.allow_ssh.id]
+    cluster_name           = "EKSCluster"
+    vpc_id                 = "${module.vpc.vpc_id}"
+    private_subnets        = "${module.vpc.private_subnets}"
+    instance_type          = "t2.medium"
+    log_retention_days     = 5
+    instance_count         = 2
+    worker_security_groups = [aws_security_group.allow_all_inbound.id, aws_security_group.allow_all_outbound.id, aws_security_group.allow_ssh.id]
+    master_security_groups = [aws_security_group.allow_all_inbound.id, aws_security_group.allow_all_outbound.id, aws_security_group.allow_ssh.id]
 }
 
-
-resource "aws_security_group" "allow_all_inbound" {
-    name        = "${var.ingress_security_group_name}"
-    vpc_id      = "${module.vpc.vpc_id}"
-
-    ingress {
-        description = "http"
-        from_port   = 80
-        to_port     = 80
-        protocol    = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
-
-    tags = {
-        Name = "allow_inbound"
-    }
+resource "aws_security_group" "default" {
+    count       = "${var.create}"
+    name        = "${var.name}"
+    description = "${var.description}"
+    vpc_id      = "${var.vpc_id}"
+    tags        = "${merge(var.tags, map("Name", format("%s", var.name)))}"
 }
 
-resource "aws_security_group" "allow_all_outbound" {
-    name        = "${var.egress_security_group_name}"
-    vpc_id      = "${module.vpc.vpc_id}"
-
-    egress {
-        from_port   = 0
-        to_port     = 0
-        protocol    = "-1"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
-
-    tags = {
-        Name = "allow_outbound"
-    }
+resource "aws_security_group_rule" "allow_all_inbound" {
+    security_group_id = "${aws_security_group.default.id}"
+    vpc_id            = "${var.vpc_id}"
+    type              = "ingress"
+    description       = "http"
+    from_port         = 80
+    to_port           = 80
+    cidr_blocks       = ["0.0.0.0/0"]
+    # ipv6_cidr_blocks = ["${var.ingress_ipv6_cidr_blocks}"]
+    protocol          = "tcp"
 }
 
-resource "aws_security_group" "allow_ssh" {
-    name        = "${var.ssh_security_group_name}"
-    vpc_id      = "${module.vpc.vpc_id}"
+resource "aws_security_group_rule" "allow_all_outbound" {
+    security_group_id = "${aws_security_group.default.id}"
+    vpc_id            = "${var.vpc_id}"
+    type              = "egress"
+    from_port         = 0
+    to_port           = 0
+    cidr_blocks       = ["0.0.0.0/0"]
+    # cidr_blocks      = ["${var.egress_cidr_blocks}"]
+    # ipv6_cidr_blocks = ["${var.egress_ipv6_cidr_blocks}"]
+    protocol          = "-1"
+}
 
-    ingress {
-        description = "ssh"
-        from_port   = 22
-        to_port     = 22
-        protocol    = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
-
-    tags = {
-        Name = "allow_ssh"
-    }
+resource "aws_security_group_rule" "allow_ssh" {
+    security_group_id = "${aws_security_group.default.id}"
+    vpc_id            = "${var.vpc_id}"
+    type              = "ingress"
+    description       = "SSH"
+    from_port         = 22
+    to_port           = 22
+    cidr_blocks       = ["0.0.0.0/0"]
+    protocol          = "tcp"
 }

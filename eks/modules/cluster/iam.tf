@@ -1,45 +1,3 @@
-// resource "aws_iam_role" "eks_assume" {
-//   name = "eks-assume"
-
-//   assume_role_policy = <<POLICY
-// {
-//   "Version": "2012-10-17",
-//   "Statement": [
-//     {
-//       "Effect": "Allow",
-//       "Principal": {
-//         "Service": "eks.amazonaws.com"
-//       },
-//       "Action": "sts:AssumeRole"
-//     }
-//   ]
-// }
-// POLICY
-// }
-
-// resource "aws_iam_role_policy_attachment" "AmazonEKSClusterPolicy" {
-//   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-//   role       = aws_iam_role.eks_assume.name
-// }
-
-// # Optionally, enable Security Groups for Pods
-// resource "aws_iam_role_policy_attachment" "AmazonEKSVPCResourceController" {
-//   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
-//   role       = aws_iam_role.eks_assume.name
-// }
-
-// resource "aws_iam_openid_connect_provider" "cluster" {
-//   client_id_list  = ["sts.amazonaws.com"]
-//   thumbprint_list = [data.tls_certificate.cluster.certificates[0].sha1_fingerprint]
-//   url             = aws_eks_cluster.cluster.identity[0].oidc[0].issuer
-// }
-
-
-// resource "aws_iam_role" "cluster_role" {
-//   assume_role_policy = data.aws_iam_policy_document.service_account_assume.json
-//   name               = "eks-cluster-sa"
-// }
-
 resource "aws_iam_role" "cluster" {
   name = "${var.master_role_name}"
 
@@ -145,3 +103,48 @@ resource "aws_iam_instance_profile" "node" {
   name = "${var.worker_role_name}"
   role = "${aws_iam_role.node.name}"
 }
+
+
+
+
+// resource "aws_iam_role" "eks_assume" {
+//   name = "eks-assume"
+
+//   assume_role_policy = <<POLICY
+// {
+//   "Version": "2012-10-17",
+//   "Statement": [
+//     {
+//       "Effect": "Allow",
+//       "Principal": {
+//         "Service": "eks.amazonaws.com"
+//       },
+//       "Action": "sts:AssumeRole"
+//     }
+//   ]
+// }
+// POLICY
+// }
+
+// resource "aws_iam_role_policy_attachment" "AmazonEKSClusterPolicy" {
+//   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+//   role       = aws_iam_role.eks_assume.name
+// }
+
+// # Optionally, enable Security Groups for Pods
+// resource "aws_iam_role_policy_attachment" "AmazonEKSVPCResourceController" {
+//   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
+//   role       = aws_iam_role.eks_assume.name
+// }
+
+// resource "aws_iam_openid_connect_provider" "cluster" {
+//   client_id_list  = ["sts.amazonaws.com"]
+//   thumbprint_list = [data.tls_certificate.cluster.certificates[0].sha1_fingerprint]
+//   url             = aws_eks_cluster.cluster.identity[0].oidc[0].issuer
+// }
+
+
+// resource "aws_iam_role" "cluster_role" {
+//   assume_role_policy = data.aws_iam_policy_document.service_account_assume.json
+//   name               = "eks-cluster-sa"
+// }

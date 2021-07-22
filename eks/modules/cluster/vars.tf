@@ -8,6 +8,7 @@ variable cluster_name { default = "EKSCluster"}
 variable instance_count { default = 2 }
 variable master_role_name { default = "EKSMaster"}
 variable worker_role_name { default = "EKSWorker"}
+variable maintenance_window { default = "cron(0 0 9 ? * SUN *)"}
 
 
 variable "worker_security_groups" {
