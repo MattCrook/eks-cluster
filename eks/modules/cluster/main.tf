@@ -30,13 +30,25 @@ resource "aws_cloudwatch_log_group" "kubernetes" {
 resource "aws_eks_node_group" "node_pool" {
   cluster_name    = "${aws_eks_cluster.clsuter.name}"
   node_group_name = "${var.node_group_name}"
-  node_role_arn   = aws_iam_role.example.arn
-  subnet_ids      = aws_subnet.example[*].id
+  node_role_arn   = "${aws_iam_role.node_group.arn}"
+  subnet_ids      = "${var.private_subnets}"
+  ami_type        = ""
+  disk_size       = ""
+  instance_types   = ""
+
+  launch_template {
+    id = ""
+  }
 
   scaling_config {
-    desired_size = 1
-    max_size     = 1
+    desired_size = 2
+    max_size     = 3
     min_size     = 1
+  }
+
+  remote_access {
+    ec2_ssh_key               = ""
+    source_security_group_ids = ""
   }
 
   # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
