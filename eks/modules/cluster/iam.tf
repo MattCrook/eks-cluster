@@ -94,6 +94,12 @@ resource "aws_iam_policy" "CloudWatchLogs" {
 EOF
 }
 
+# Originally under Resource: Todo: dynamically add account_id
+# Outputs > vars or module for dynamic adding
+# "arn:aws:logs:${var.region}:${var.account_id}:log-group::log-stream:"
+# "arn:aws:logs:${var.region}:${aws_iam_role.node.unique_id}:log-group::log-stream:"
+
+
 resource "aws_iam_role_policy_attachment" "CloudWatchLogs" {
     role       = "${aws_iam_role.node.name}"
     policy_arn = "${aws_iam_policy.CloudWatchLogs.arn}"
@@ -132,16 +138,16 @@ resource "aws_iam_instance_profile" "node" {
 // }
 
 // # Optionally, enable Security Groups for Pods
-// resource "aws_iam_role_policy_attachment" "AmazonEKSVPCResourceController" {
-//   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
-//   role       = aws_iam_role.eks_assume.name
-// }
+resource "aws_iam_role_policy_attachment" "AmazonEKSVPCResourceController" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
+  role       = aws_iam_role.cluster.name
+}
 
-// resource "aws_iam_openid_connect_provider" "cluster" {
-//   client_id_list  = ["sts.amazonaws.com"]
-//   thumbprint_list = [data.tls_certificate.cluster.certificates[0].sha1_fingerprint]
-//   url             = aws_eks_cluster.cluster.identity[0].oidc[0].issuer
-// }
+resource "aws_iam_openid_connect_provider" "cluster" {
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = [data.tls_certificate.cluster.certificates[0].sha1_fingerprint]
+  url             = aws_eks_cluster.cluster.identity[0].oidc[0].issuer
+}
 
 
 // resource "aws_iam_role" "cluster_role" {

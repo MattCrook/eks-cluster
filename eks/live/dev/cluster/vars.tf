@@ -8,8 +8,9 @@ variable "region" {
 # Security group
 #################
 
-variable "create" {
-  description = "Whether to create security group and all rules"
+variable "create_security_group" {
+  description = "Define as true if you want to create a security group. False will not."
+  type        = bool
   default     = true
 }
 
@@ -19,12 +20,9 @@ variable "name" {
   default     = "DefaultSecurityGroup"
 }
 
-variable "vpc_id" {
-  description = "ID of the VPC where to create security group"
-}
-
 variable "description" {
   description = "Description of security group"
+  type        = string
   default     = "Security Group managed by Terraform"
 }
 
@@ -32,8 +30,8 @@ variable "tags" {
   description = "A mapping of tags to assign to security group"
   type        = map(string)
   default     = {
-    Name = DefaultSecurityGroup
-    env = dev
+    Name = "DefaultSecurityGroup"
+    env = "dev"
   }
 }
 

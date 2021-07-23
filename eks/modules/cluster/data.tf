@@ -21,13 +21,35 @@ data "aws_iam_policy_document" "service_account_assume" {
   }
 }
 
-data "aws_ami" "eks-worker" {
-  filter {
-    name   = "name"
-    values = ["${var.ami_name}"]
-  }
+# For built dev account
+// data "aws_ami" "eks-worker" {
+//   most_recent = true
 
-  most_recent = true
-  # us-east-1 x86 optimized-ami/1.20/amazon-linux-2
-  owners      = ["0260be01d66417f7f"]
-}
+//   filter {
+//     name   = "name"
+//     values = ["${var.ami_name}"]
+//   }
+
+//   # us-east-1 x86 optimized-ami/1.20/amazon-linux-2
+# List of AMI owners to limit search. At least 1 value must be specified. Valid values: an AWS account ID, self (the current account),
+# or an AWS owner alias (e.g. amazon, aws-marketplace, etc...)
+# Use the dev-developer account ID or self
+//   owners      = ["0260be01d66417f7f"]
+// }
+
+
+# For personal account - testing purposes
+// data "aws_ami" "eks-worker" {
+//   most_recent      = true
+//   owners           = ["0eeeef929db40543c"]
+
+//   filter {
+//     name   = "name"
+//     values = ["${var.ami_name}"]
+//   }
+
+//   filter {
+//     name   = "virtualization-type"
+//     values = ["hvm"]
+//   }
+// }

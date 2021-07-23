@@ -30,3 +30,15 @@ output "default_security_group_description" {
   description = "The description of the security group"
   value       = "${module.cluster.default_security_group_description}"
 }
+
+
+###################################
+# Default VPC for testing purposes
+##################################
+output "subnet_cidr_blocks" {
+  value = [for s in data.aws_subnet.default : s.cidr_block]
+}
+
+output "aws_subnet_ids" {
+  value = data.aws_subnet_ids.default.ids
+}
