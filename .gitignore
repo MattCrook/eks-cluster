@@ -1,3 +1,7 @@
 .terraform
 *.tfstate
 *.tfstate.*
+
+extra.tf*
+node_group_key.pem*
+*node_modules/

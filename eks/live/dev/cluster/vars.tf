@@ -17,7 +17,7 @@ variable "create_security_group" {
 variable "name" {
   description = "Name of the Security Group"
   type        = string
-  default     = "DefaultSecurityGroup"
+  default     = "EKSClusterSecurityGroup"
 }
 
 variable "description" {
@@ -30,7 +30,7 @@ variable "tags" {
   description = "A mapping of tags to assign to security group"
   type        = map(string)
   default     = {
-    Name = "DefaultSecurityGroup"
+    Name = "EKSDefaultSecurityGroup"
     env = "dev"
   }
 }

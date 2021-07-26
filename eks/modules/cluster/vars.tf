@@ -13,6 +13,16 @@ variable tags { description = "Tags of the Security Group" }
 variable description { description = "Description of security group" }
 
 
+variable "endpoint_private_access" {
+  description = "Whether the Amazon EKS private API server endpoint is enabled"
+  type        = bool
+}
+
+variable "endpoint_public_access" {
+  description = "Whether the Amazon EKS public API server endpoint is enabled"
+  type        = bool
+}
+
 variable "create_security_group" {
   description = "Define as true if you want to create a security group. False will not."
   type        = bool
@@ -30,15 +40,15 @@ variable "master_security_groups" {
   default     = []
 }
 
-variable "private_subnets" {
-  description = "A list of subnet IDs to launch resources in. Subnets automatically determine which availability zones the group will reside"
-  type        = list(string)
-}
+// variable "private_subnets" {
+//   description = "A list of subnet IDs to launch resources in. Subnets automatically determine which availability zones the group will reside"
+//   type        = list(string)
+// }
 
 # VPC ID for the security groups. Variable is filled in in the module, by gettig the value of the output of the module for vpc.
-variable "vpc_id" {
-  description = "ID of the VPC where to create security group"
-}
+// variable "vpc_id" {
+//   description = "ID of the VPC where to create security group"
+// }
 
 variable "name" {
   description = "Name of the Security Group"
@@ -49,3 +59,30 @@ variable "ami_id" {
   description = "ID of the ami to use as the image for the VM of the node. Can be found on the Amazon Marketplace"
   type        = string
 }
+
+variable "ami_type" {
+  description = "Type of Amazon Machine Image (AMI) associated with the EKS Node Group"
+  type        = string
+  default     = "AL2_x86_64"
+}
+
+variable "disk_size" {
+  description = "Disk size in GiB for worker nodes"
+  type        = string
+  default     = "50"
+}
+
+variable "instance_types" {
+  description = "List of instance types associated with the EKS Node Group"
+  type        = list(string)
+}
+
+variable "node_group_name" {
+  description = "Name of the Node group (or Node Pool)"
+  type        = string
+}
+
+// variable "source_security_group_id" {
+//   description = "Security group id to allow access to/from, depending on the type"
+//   type        = string
+// }

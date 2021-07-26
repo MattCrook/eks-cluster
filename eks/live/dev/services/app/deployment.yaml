@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webserver-app-deployment
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: node-app
+      enabled: "true"
+  template:
+    metadata:
+      labels:
+        app: node-app
+        enabled: "true"
+    spec:
+      containers:
+      - image: mgcrook11/eks-demo-app:1.0
+        imagePullPolicy: IfNotPresent
+        name: webserver-app
+        resources:
+          limits:
+            memory: "64Mi"
+            cpu: "250m"
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        readinessProbe:
+            # Type of readiness probe (one of the three types)
+            exec:
+              # readiness probe may be defined for each container in the pod.
+              # ls /var/ready return 0 exit code if the file exists, non-zero if it doesn't.
+              command:
+                - ls
+                - /var/ready
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 20

@@ -1,0 +1,15 @@
+extends layout
+
+block layout-content
+  div.View
+    h1.Banner Welcome inside a an EKS Cluster
+    div.Message
+      div.Title
+        h1 This is an Express App
+        h4 Hi Jeremy.
+        div.Description You just hit the load balancer that is provided by AWS when selecting a Service type of "LoadBalancer" in the Kubernetes config.
+      span.Details That got forwarded to a NodePort that is only available inside the cluster, that then forwarded your request inside a pod where this app is running in a Docker container and listening on port 8080.
+        div.Description Yay!
+    div.NavButtons
+      a(href="/user")
+          div.NavButton More on me

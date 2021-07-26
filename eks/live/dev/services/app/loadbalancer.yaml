@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dev-loadbalancer
+spec:
+  selector:
+    app: node-app
+    enabled: "true"
+  type: LoadBalancer
+  # Prevent a network hop, by configuring service to redirect all external traffic only to pods running on the node that received the connection.
+  # externalTrafficPolicy: Local
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+    nodePort: 32457

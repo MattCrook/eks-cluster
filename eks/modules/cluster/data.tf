@@ -1,7 +1,3 @@
-data "tls_certificate" "cluster" {
-  url = aws_eks_cluster.cluster.identity[0].oidc[0].issuer
-}
-
 # For assuming Federated User through an Identity provider
 data "aws_iam_policy_document" "service_account_assume" {
   statement {
@@ -21,6 +17,9 @@ data "aws_iam_policy_document" "service_account_assume" {
   }
 }
 
+
+
+############################################################
 # For built dev account
 // data "aws_ami" "eks-worker" {
 //   most_recent = true

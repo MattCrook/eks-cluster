@@ -1,18 +1,21 @@
 resource "aws_ssm_maintenance_window" "node" {
-  name = "maintenance-window-eks-node"
+  name        = "maintenance-window-eks-node"
   description = "Maintenance Window for EKS Node updates, Sunday at 5am EST"
-  schedule = "${var.maintenance_window}"
-  duration = 3
-  cutoff = 1
+  schedule    = "${var.maintenance_window}"
+  duration    = 3
+  cutoff      = 1
 }
 
 resource "aws_ssm_maintenance_window_target" "node" {
-  window_id = "${aws_ssm_maintenance_window.node.id}"
-  resource_type = "INSTANCE"
+  window_id     = "${aws_ssm_maintenance_window.node.id}"
+  resource_type = "RESOURCE_GROUP"
+  # resource_type = "INSTANCE"
 
   targets {
-    key = "tag:aws:autoscaling:groupName"
-    values = ["${aws_autoscaling_group.node.name}"]
+    # key    = "tag:aws:autoscaling:groupName"
+    key    = "resource-groups:Name"
+    values = ["${aws_eks_node_group.node_pool.node_group_name}"]
+    # values = ["${aws_autoscaling_group.node.name}"]
   }
 
   owner_information = "aws dev-developer"

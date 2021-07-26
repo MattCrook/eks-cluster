@@ -1,3 +1,6 @@
+###############
+# EKS Cluster
+###############
 resource "aws_iam_role" "cluster" {
   name = "${var.master_role_name}"
 
@@ -27,7 +30,9 @@ resource "aws_iam_role_policy_attachment" "AmazonEKSServicePolicy" {
   role       = "${aws_iam_role.cluster.name}"
 }
 
-
+###############
+# EKS Node
+###############
 resource "aws_iam_role" "node" {
   name = "${var.worker_role_name}"
 
@@ -63,6 +68,10 @@ resource "aws_iam_role_policy_attachment" "AmazonEC2ContainerRegistryReadOnly" {
 }
 
 
+
+#######################
+# Cloudwatch / Logging
+######################
 resource "aws_iam_policy" "CloudWatchLogs" {
     name        = "kubernetes"
     description = "Kubernetes node policy to allow writing logs"
@@ -115,12 +124,6 @@ resource "aws_iam_instance_profile" "node" {
 resource "aws_iam_role_policy_attachment" "AmazonEKSVPCResourceController" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
   role       = aws_iam_role.cluster.name
-}
-
-resource "aws_iam_openid_connect_provider" "cluster" {
-  client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = [data.tls_certificate.cluster.certificates[0].sha1_fingerprint]
-  url             = aws_eks_cluster.cluster.identity[0].oidc[0].issuer
 }
 
 

@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dev-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    # Install and deploy nginx ingress controller:
+    # kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.47.0/deploy/static/provider/cloud/deploy.yaml
+spec:
+  defaultBackend:
+    service:
+      name: dev-nodeport
+      port:
+        number: 80
+  rules:
+    # add the Ingress Public IP to your etc/hosts file locally in order to do this
+    #- host: demo.webserver.com
+    - http:
+        paths:
+          - path: /*
+            pathType: Prefix
+            backend:
+              # GKE requires the Ingress controller to point at a Nodeport service.
+              service:
+                name: dev-nodeport
+                port:
+                  number: 80
