@@ -41,32 +41,41 @@ output "kubeconfig-certificate-authority-data" {
 
 output "default_security_group_id" {
   description = "The ID of the security group"
-  value       = "${module.cluster.default_security_group_id}"
+  value       = "${module.cluster.default_security_group_id[0]}"
 }
 
 output "default_security_group_vpc_id" {
   description = "The VPC ID"
-  value       = "${module.cluster.default_security_group_vpc_id}"
+  value       = "${module.cluster.default_security_group_vpc_id[0]}"
 }
 
 output "default_security_group_owner_id" {
   description = "The owner ID"
-  value       = "${module.cluster.default_security_group_owner_id}"
+  value       = "${module.cluster.default_security_group_owner_id[0]}"
 }
 
 output "default_security_group_name" {
   description = "The name of the security group"
-  value       = "${module.cluster.default_security_group_name}"
+  value       = "${module.cluster.default_security_group_name[0]}"
 }
 
 output "default_security_group_description" {
   description = "The description of the security group"
-  value       = "${module.cluster.default_security_group_description}"
+  value       = "${module.cluster.default_security_group_description[0]}"
 }
 
 output "cluster_security_group_id" {
   description = "Cluster security group that was created by Amazon EKS for the cluster. Managed node groups use this security group for control-plane-to-data-plane communication"
-  value       = "${module.cluster.cluster_security_group_id}"
+  value       = "${module.cluster.cluster_security_group_id[*]}"
+}
+
+
+##############
+# ConfigMap
+##############
+
+output "config-map-aws-auth" {
+  value = "${module.cluster.config-map-aws-auth}"
 }
 
 // output "source_security_group_id" {

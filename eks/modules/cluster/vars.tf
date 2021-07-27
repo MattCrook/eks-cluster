@@ -82,6 +82,24 @@ variable "node_group_name" {
   type        = string
 }
 
+#######################################
+# Scaling Config for aws_eks_node_group
+#######################################
+variable "desired_size" {
+  description = "Desired number of worker nodes"
+  type        = number
+}
+
+variable "max_size" {
+  description = "Maximum number of worker nodes"
+  type        = number
+}
+
+variable "min_size" {
+  description = "Minimum number of worker nodes"
+  type        = number
+}
+
 // variable "source_security_group_id" {
 //   description = "Security group id to allow access to/from, depending on the type"
 //   type        = string

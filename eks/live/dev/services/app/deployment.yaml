@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: webserver-app-deployment
+  name: node-app-deployment
   namespace: default
 spec:
   selector:
@@ -17,7 +17,7 @@ spec:
       containers:
       - image: mgcrook11/eks-demo-app:1.0
         imagePullPolicy: IfNotPresent
-        name: webserver-app
+        name: node-app
         resources:
           limits:
             memory: "64Mi"

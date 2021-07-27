@@ -1,18 +1,18 @@
 output "endpoint" {
-  value = aws_eks_cluster.cluster.endpoint
+  value = "${aws_eks_cluster.cluster.endpoint}"
 }
 
 output "region" {
-  value = var.region
+  value = "${var.region}"
 }
 
 output "cluster_name" {
-  value = aws_eks_cluster.cluster.name
+  value = "${aws_eks_cluster.cluster.name}"
 }
 
 output "node_group_arn" {
   description = "Amazon Resource Name (ARN) of the EKS Node Group"
-  value       = aws_eks_node_group.node_pool.arn
+  value       = "${aws_eks_node_group.node_pool.arn}"
 }
 
 output "resources" {
@@ -32,7 +32,7 @@ output "autoscaling_group_names" {
 
 output "remote_access_security_group_id" {
   description = "Identifier of the remote access EC2 Security Group"
-  value       = aws_eks_node_group.node_pool.resources.*.remote_access_security_group_id
+  value       = "${aws_eks_node_group.node_pool.resources.*.remote_access_security_group_id}"
 }
 
 output "kubeconfig-certificate-authority-data" {
@@ -67,6 +67,14 @@ output "default_security_group_description" {
 output "cluster_security_group_id" {
   description = "Cluster security group that was created by Amazon EKS for the cluster. Managed node groups use this security group for control-plane-to-data-plane communication"
   value       = "${aws_eks_cluster.cluster.vpc_config[*].cluster_security_group_id}"
+}
+
+##############
+# ConfigMap
+##############
+
+output "config-map-aws-auth" {
+  value = "${local.config-map-aws-auth}"
 }
 
 

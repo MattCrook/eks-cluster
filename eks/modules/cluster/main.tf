@@ -18,6 +18,7 @@ resource "aws_eks_cluster" "cluster" {
   name                      = "${var.cluster_name}"
   role_arn                  = "${aws_iam_role.cluster.arn}"
   enabled_cluster_log_types = ["api", "audit"]
+  version                   = "1.21"
 
   vpc_config {
     security_group_ids      = "${aws_security_group.default.*.id}"
@@ -40,14 +41,14 @@ resource "aws_eks_cluster" "cluster" {
   ]
 }
 
-resource "aws_cloudwatch_log_group" "kubernetes" {
-  name              = "kubernetes"
-  retention_in_days = "${var.log_retention_days}"
-}
-
-#####################################
+#################################################
 # SSH Key for worker nodes/ Node Group
-######################################
+# Key will be saved locally for now, and should be used when tyring to SSH onto a Node.
+# chmod 400 webserver_key.pem
+
+# ssh -i "webserver_key.pem" ec2-user@ec2-13-36-235-21.eu-west-3.compute.amazonaws.com
+
+#################################################
 resource "tls_private_key" "node_group_private_key" {
    algorithm = "RSA"
    rsa_bits  = 4096
@@ -65,76 +66,31 @@ resource "aws_key_pair" "node_group_key" {
 }
 
 
-// resource "aws_launch_template" "cluster" {
-//   description            = "Provides an EC2 launch template resource. Can be used to create instances or auto scaling groups."
-//   image_id               = "${var.ami_id}"
-//   instance_type          = "${var.instance_type}"
-//   name                   = "EKSCluster-launch-template"
-//   update_default_version = true
-//   key_name               = "${aws_key_pair.node_group_key.key_name}"
-//   vpc_security_group_ids = [aws_security_group.default[0].id]
 
-
-//   iam_instance_profile {
-//     name = "${aws_iam_instance_profile.node.name}"
-//   }
-
-//   monitoring {
-//     enabled = true
-//   }
-
-//   network_interfaces {
-//     associate_public_ip_address = true
-//     security_groups             = "${aws_security_group.default.*.id}"
-//     subnet_id                   = "${aws_subnet.default[0].id}"
-//   }
-
-//   block_device_mappings {
-//     device_name = "/dev/sda1"
-
-//     ebs {
-//       volume_size = "${var.disk_size}"
-//     }
-//   }
-
-//   tag_specifications {
-//     resource_type = "instance"
-
-//     tags = {
-//       Name = "eks-instance-launch-template"
-//       "kubernetes.io/cluster/${var.cluster_name}" = "owned"
-//     }
-//   }
-//   user_data = "${base64encode(local.node-userdata)}"
-
-//   # user_data = base64encode(templatefile("userdata.tpl", { CLUSTER_NAME = aws_eks_cluster.cluster.name, B64_CLUSTER_CA = aws_eks_cluster.cluster.certificate_authority[0].data, API_SERVER_URL = aws_eks_cluster.cluster.endpoint }))
-// }
-
-// data "aws_launch_template" "cluster" {
-//   name = aws_launch_template.cluster.name
-
-//   depends_on = [aws_launch_template.cluster]
-// }
-
+###########################################################################
+# AWS EKS Node Group
 # Manages an EKS Node Group, which can provision and optionally update an Auto Scaling Group of Kubernetes worker nodes compatible with EKS.
 # Amazon EKS managed node groups automate the provisioning and lifecycle management of nodes (Amazon EC2 instances) for Amazon EKS Kubernetes clusters.
 # With Amazon EKS managed node groups, you don’t need to separately provision or register the Amazon EC2 instances that provide compute capacity to run your Kubernetes applications.
 # You can create, automatically update, or terminate nodes for your cluster with a single operation.
-
 # All node groups are created with the latest AMI release version for the respective minor Kubernetes version of the cluster,
-# unless you deploy a custom AMI using a launch template.
-
+# UNLESS you deploy a custom AMI using a launch template. (Use aws_launch_template to do this).
 # An Amazon EKS managed node group is an Amazon EC2 Auto Scaling group and associated Amazon EC2 instances that are managed by AWS for an Amazon EKS cluster.
+# Right now, this is a single AZ node pool (cluster). Nodes will be put into the subnets defined by CIDR blocks. Can create a multi AZ cluster, example:
+# https://github.com/umotif-public/terraform-aws-eks-node-group/blob/master/examples/multiaz-node-group/main.tf
+###########################################################################
+
 resource "aws_eks_node_group" "node_pool" {
   cluster_name    = "${aws_eks_cluster.cluster.name}"
   node_group_name = "${var.node_group_name}"
   node_role_arn   = "${aws_iam_role.node.arn}"
   # subnet_ids      = "${var.subnet_ids}"
-  subnet_ids      = [for subnet in aws_subnet.default : subnet.id]
+  # subnet_ids      = [for subnet in aws_subnet.default : subnet.id]
+  subnet_ids      = aws_subnet.default[*].id
   ami_type        = "${var.ami_type}"
   disk_size       = "${var.disk_size}"
   instance_types  = "${var.instance_types}"
-  # capacity_type   = "ON_DEMAND"
+  version         = "1.21"
 
   // launch_template {
   //   id      = aws_launch_template.cluster.id
@@ -142,9 +98,9 @@ resource "aws_eks_node_group" "node_pool" {
   // }
 
   scaling_config {
-    desired_size = 2
-    max_size     = 3
-    min_size     = 1
+    desired_size = "${var.desired_size}"
+    max_size     = "${var.max_size}"
+    min_size     = "${var.min_size}"
   }
 
   remote_access {
@@ -156,8 +112,8 @@ resource "aws_eks_node_group" "node_pool" {
   }
 
   tags = {
-    # Environment = "dev"
-    "kubernetes.io/cluster/${var.cluster_name}" = "owned"
+    Environment = "dev"
+    # "kubernetes.io/cluster/${var.cluster_name}" = "owned"
   }
 
   # Kubernetes labels
@@ -179,7 +135,8 @@ resource "aws_eks_node_group" "node_pool" {
   ]
 }
 
-
+# Using data source to get info such as SHA1 fingerprint or serial number, about the TLS certificates that protect an HTTPS website.
+# Getting this to use as URL for aws_iam_openid_connect_provider to associate cluster to the OpenIDConnect provider.
 data "tls_certificate" "cluster" {
   url = aws_eks_cluster.cluster.identity[0].oidc[0].issuer
 }
@@ -189,4 +146,10 @@ resource "aws_iam_openid_connect_provider" "cluster" {
   client_id_list  = ["sts.amazonaws.com"]
   thumbprint_list = [data.tls_certificate.cluster.certificates[0].sha1_fingerprint]
   url             = aws_eks_cluster.cluster.identity[0].oidc[0].issuer
+}
+
+# Provides a CloudWatch Log Group resource
+resource "aws_cloudwatch_log_group" "kubernetes" {
+  name              = "kubernetes"
+  retention_in_days = "${var.log_retention_days}"
 }
