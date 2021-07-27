@@ -24,7 +24,7 @@ resource "aws_eks_cluster" "cluster" {
     security_group_ids      = "${aws_security_group.default.*.id}"
     # security_group_ids      = ["${var.master_security_groups}"]
     # subnet_ids              = "${var.private_subnets}"
-    subnet_ids              = [for subnet in aws_subnet.default : subnet.id]
+    subnet_ids              = aws_subnet.default[*].id
     endpoint_private_access = "${var.endpoint_private_access}"
     endpoint_public_access  = "${var.endpoint_public_access}"
     # public_access_cidrs     = var.public_access_cidrs
@@ -34,7 +34,7 @@ resource "aws_eks_cluster" "cluster" {
   # Otherwise, EKS will not be able to properly delete EKS managed EC2 infrastructure such as Security Groups.
   depends_on = [
     aws_iam_role_policy_attachment.AmazonEKSClusterPolicy,
-    aws_iam_role_policy_attachment.AmazonEKSVPCResourceController,
+    # aws_iam_role_policy_attachment.AmazonEKSVPCResourceController,
     aws_iam_role_policy_attachment.AmazonEKSServicePolicy,
     aws_cloudwatch_log_group.kubernetes,
     aws_security_group.default
@@ -44,9 +44,8 @@ resource "aws_eks_cluster" "cluster" {
 #################################################
 # SSH Key for worker nodes/ Node Group
 # Key will be saved locally for now, and should be used when tyring to SSH onto a Node.
-# chmod 400 webserver_key.pem
-
-# ssh -i "webserver_key.pem" ec2-user@ec2-13-36-235-21.eu-west-3.compute.amazonaws.com
+# chmod 400 node_group_key.pem
+# ssh -i "node_group_key.pem" ec2-user@ec2-13-36-235-21.eu-west-3.compute.amazonaws.com
 
 #################################################
 resource "tls_private_key" "node_group_private_key" {
@@ -56,16 +55,75 @@ resource "tls_private_key" "node_group_private_key" {
 
 resource "local_file" "private_key" {
    content         = tls_private_key.node_group_private_key.private_key_pem
-   filename        = "node_group_key.pem"
+   filename        = "node-group-key.pem"
    file_permission = 0400
 }
 
 resource "aws_key_pair" "node_group_key" {
-   key_name   = "NodegGroupSSHKey"
+   key_name   = "node-group-key"
    public_key = tls_private_key.node_group_private_key.public_key_openssh
 }
 
+// resource "aws_launch_template" "cluster" {
+//   description            = "Provides an EC2 launch template resource. Can be used to create instances or auto scaling groups"
+//   image_id               = "${var.ami_id}"
+//   instance_type          = "${var.instance_type}"
+//   name                   = "EKSCluster-launch-template"
+//   update_default_version = true
+//   key_name               = "${aws_key_pair.node_group_key.key_name}"
+//   vpc_security_group_ids = "${aws_security_group.default.*.id}"
 
+//   iam_instance_profile {
+//     name = "${aws_iam_instance_profile.node.arn}"
+//   }
+
+//   monitoring {
+//     enabled = true
+//   }
+
+//   network_interfaces {
+//     # associate_public_ip_address = true
+//     delete_on_termination       = true
+//     security_groups             = "${aws_security_group.default.*.id}"
+//     subnet_id                   = "${aws_subnet.default[0].id}"
+//   }
+
+//   block_device_mappings {
+//     device_name = "/dev/sda1"
+
+//     ebs {
+//       volume_size = 20
+//       volume_type = "gp2"
+//       delete_on_termination = true
+//     }
+//   }
+
+//   // placement {
+//   //   host_resource_group_arn = aws_eks_node_group.node_pool.arn
+//   //   # group_name = 
+//   //   # affinity = 
+//   //   # tenancy = 
+//   //   # availability_zone = "us-east-2a"
+//   // }
+
+//   metadata_options {
+//     http_endpoint = "enabled"
+//     http_tokens   = "optional"
+//   }
+
+//   tag_specifications {
+//     resource_type = "instance"
+
+//     tags = {
+//       Name = "eks-instance-launch-template"
+//       "kubernetes.io/cluster/${var.cluster_name}" = "owned"
+//     }
+//   }
+
+//   user_data = "${base64encode(local.node-userdata)}"
+// }
+
+  # user_data = base64encode(templatefile("userdata.tpl", { CLUSTER_NAME = aws_eks_cluster.cluster.name, B64_CLUSTER_CA = aws_eks_cluster.cluster.certificate_authority[0].data, API_SERVER_URL = aws_eks_cluster.cluster.endpoint }))
 
 ###########################################################################
 # AWS EKS Node Group
@@ -93,8 +151,10 @@ resource "aws_eks_node_group" "node_pool" {
   version         = "1.21"
 
   // launch_template {
-  //   id      = aws_launch_template.cluster.id
-  //   version = aws_launch_template.cluster.latest_version
+    // id      = "${aws_launch_template.cluster.id}"
+    // version = "${aws_launch_template.cluster.latest_version}"
+    // id      = aws_launch_template.cluster.id
+    // version = aws_launch_template.cluster.latest_version
   // }
 
   scaling_config {
@@ -106,7 +166,6 @@ resource "aws_eks_node_group" "node_pool" {
   remote_access {
     # source_security_group_ids = [var.source_security_group_id, aws_eks_cluster.cluster.vpc_config[0].cluster_security_group_id, aws_security_group.default[0].id]
     ec2_ssh_key               = "${aws_key_pair.node_group_key.key_name}"
-
     source_security_group_ids = "${aws_security_group.default.*.id}"
     # source_security_group_ids = aws_eks_node_group.node_pool.resources.*.remote_access_security_group_id
   }
@@ -122,7 +181,7 @@ resource "aws_eks_node_group" "node_pool" {
   }
 
   lifecycle {
-    create_before_destroy = true
+    # create_before_destroy = true
     ignore_changes        = [scaling_config[0].desired_size]
   }
 
