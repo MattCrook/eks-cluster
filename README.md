@@ -11,6 +11,23 @@
 
 SSH Onto one of your Nodes (Which are just EC2 instances, that the Cluster is using as Compute resources)
 
-* `ssh -i "NodegGroupSSHKey.pem" root@ec2-44-195-25-170.compute-1.amazonaws.com`
-* * `ssh -i "node_group_key.pem" root@ec2-44-195-25-170.compute-1.amazonaws.com`
-3.85.176.210
+Example:
+* `ssh -i "node_group_key.pem" root@ec2-44-195-25-170.compute-1.amazonaws.com`
+
+Build Docker image and Run App in Docker container locally
+
+* `docker build -t eks-demo-app .`
+
+
+### Notes
+
+Installed for Demo App:
+
+```
+npm init -y
+npm i -D nodemon
+npm i pug
+npm i -D browser-sync
+browser-sync init
+npm i express
+```

@@ -11,7 +11,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/user", (req, res) => {
-  res.render("user", { title: "Profile", userProfile: { fullName: "Matt Crook" } });
+  res.render("user", { title: "Profile", userProfile: { fullName: "Matthew Crook", name: "Matt Crook", skills: ["Javascript", "Python", "Go", "Kubernetes", "Terraform", "Helm", "Bash", "Docker"] } });
 });
 
 app.set("views", path.join(__dirname, "views"));

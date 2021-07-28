@@ -6,10 +6,8 @@ block layout-content
     div.Message
       div.Title
         h1 This is an Express App
-        h4 Hi Jeremy.
-        div.Description You just hit the load balancer that is provided by AWS when selecting a Service type of "LoadBalancer" in the Kubernetes config.
-      span.Details That got forwarded to a NodePort that is only available inside the cluster, that then forwarded your request inside a pod where this app is running in a Docker container and listening on port 8080.
-        div.Description Yay!
+      div.Description Your request just hit the load balancer that is provided by, and provisioned behind the scenes in AWS when selecting a Service type of "LoadBalancer" in the Kubernetes configuration.
+      span.Details That request then got forwarded to a NodePort that is only available inside the cluster, that then forwarded the requests to a ClusterIP service, which then picked a pod, and forwarded your request inside that pod where this app is running in a Docker container and listening on port 8080.
     div.NavButtons
       a(href="/user")
           div.NavButton More on me
