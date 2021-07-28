@@ -64,66 +64,6 @@ resource "aws_key_pair" "node_group_key" {
    public_key = tls_private_key.node_group_private_key.public_key_openssh
 }
 
-// resource "aws_launch_template" "cluster" {
-//   description            = "Provides an EC2 launch template resource. Can be used to create instances or auto scaling groups"
-//   image_id               = "${var.ami_id}"
-//   instance_type          = "${var.instance_type}"
-//   name                   = "EKSCluster-launch-template"
-//   update_default_version = true
-//   key_name               = "${aws_key_pair.node_group_key.key_name}"
-//   vpc_security_group_ids = "${aws_security_group.default.*.id}"
-
-//   iam_instance_profile {
-//     name = "${aws_iam_instance_profile.node.arn}"
-//   }
-
-//   monitoring {
-//     enabled = true
-//   }
-
-//   network_interfaces {
-//     # associate_public_ip_address = true
-//     delete_on_termination       = true
-//     security_groups             = "${aws_security_group.default.*.id}"
-//     subnet_id                   = "${aws_subnet.default[0].id}"
-//   }
-
-//   block_device_mappings {
-//     device_name = "/dev/sda1"
-
-//     ebs {
-//       volume_size = 20
-//       volume_type = "gp2"
-//       delete_on_termination = true
-//     }
-//   }
-
-//   // placement {
-//   //   host_resource_group_arn = aws_eks_node_group.node_pool.arn
-//   //   # group_name = 
-//   //   # affinity = 
-//   //   # tenancy = 
-//   //   # availability_zone = "us-east-2a"
-//   // }
-
-//   metadata_options {
-//     http_endpoint = "enabled"
-//     http_tokens   = "optional"
-//   }
-
-//   tag_specifications {
-//     resource_type = "instance"
-
-//     tags = {
-//       Name = "eks-instance-launch-template"
-//       "kubernetes.io/cluster/${var.cluster_name}" = "owned"
-//     }
-//   }
-
-//   user_data = "${base64encode(local.node-userdata)}"
-// }
-
-  # user_data = base64encode(templatefile("userdata.tpl", { CLUSTER_NAME = aws_eks_cluster.cluster.name, B64_CLUSTER_CA = aws_eks_cluster.cluster.certificate_authority[0].data, API_SERVER_URL = aws_eks_cluster.cluster.endpoint }))
 
 ###########################################################################
 # AWS EKS Node Group
